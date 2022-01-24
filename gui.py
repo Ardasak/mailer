@@ -40,16 +40,13 @@ def logout():
             config.write(configfile)
         exit()
     else:
-        message_box(QMessageBox.Icon.Critical, "Error", "Already logged out.")
+        message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok, "Error", "Already logged out.")
 
-def message_box(icon, title, text):
+def message_box(icon, buttons, title, text):
     msg = QMessageBox()
     msg.setIcon(icon)
     msg.setText(text)
-    if icon == QMessageBox.Icon.Critical:
-        msg.setStandardButtons(QMessageBox.StandardButton.Ok)
-    else:
-        msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+    msg.setStandardButtons(buttons)
     msg.setWindowTitle(title)
     return msg.exec()
 
@@ -209,12 +206,12 @@ class Window(QWidget):
             self.attach_file_button.setIcon(QtGui.QIcon(QtGui.QPixmap("icon/attachment.png")))
             self.clear_fields()
         except smtplib.SMTPAuthenticationError:
-            message_box(QMessageBox.Icon.Critical, "Error", "It looks like we can't send mails with the infos you provide, try logging in again. Make sure the infos are correct.")
+            message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok,"Error", "It looks like we can't send mails with the infos you provide, try logging in again. Make sure the infos are correct.")
             logout()
         except ssl.SSLCertVerificationError:
-            message_box(QMessageBox.Icon.Critical, "Error", "SSL certificate verify failed.")
+            message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok ,"Error", "SSL certificate verify failed.")
         except: 
-            message_box(QMessageBox.Icon.Critical, "Error", "An error occured while sending the email.")
+            message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok, "Error", "An error occured while sending the email.")
 
     def clear_fields(self):
         self.list_widget.clear()
@@ -227,12 +224,12 @@ class Window(QWidget):
             self.list_widget.addItem(self.email_add_field.text())
             self.email_add_field.clear()
         else:
-            message_box(QMessageBox.Icon.Critical, "Error", "Please check the validity of the email address")
+            message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok, "Error", "Please check the validity of the email address")
 
     def edit_item(self):
         index = self.list_widget.currentRow()
         if index == -1:
-            message_box(QMessageBox.Icon.Critical, "Error", "Please select an item to edit.")
+            message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok, "Error", "Please select an item to edit.")
             return
         if(validate(self.email_add_field.text())):
             self.list_widget.takeItem(index)
@@ -242,17 +239,17 @@ class Window(QWidget):
     def delete_item(self):
         item = self.list_widget.takeItem(self.list_widget.currentRow())
         if item == None:
-            message_box(QMessageBox.Icon.Critical, "Error", "Please select an item to delete.")
+            message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok, "Error", "Please select an item to delete.")
             return
         self.list_widget.removeItemWidget(item)
         self.email_add_field.clear()
 
     def clear_all(self):
         if self.get_mail_list() == [] and self.subject_area.text() == '' and self.message_area.toPlainText() == '':
-            message_box(QMessageBox.Icon.Critical, "Error", "There is nothing to clear.")
+            message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok, "Error", "There is nothing to clear.")
             return
             
-        result = message_box(QMessageBox.Icon.Warning, "Warning", "Are you sure you want to clear all the fields?")
+        result = message_box(QMessageBox.Icon.Warning, QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,"Warning", "Are you sure you want to clear all the fields?")
         if result == 16384:
             self.clear_fields()
     
@@ -404,7 +401,7 @@ class MainWindow(QMainWindow):
                 if provider_server != "":
                     provider = provider_server
                 else:
-                    message_box(QMessageBox.Icon.Critical, "Error", "SMTP Server Address can not be empty.")
+                    message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok,"Error", "SMTP Server Address can not be empty.")
                     return
                 try:
                     provider_port_input = int(provider_port_input)
@@ -413,10 +410,10 @@ class MainWindow(QMainWindow):
                     else:
                         provider_port = 587
                 except ValueError:
-                    message_box(QMessageBox.Icon.Critical, "Error", "SMTP port must be an integer value.")
+                    message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok,"Error", "SMTP port must be an integer value.")
                     return
             else:
-                message_box(QMessageBox.Icon.Critical, "Error", "Please choose a provider.")
+                message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok,"Error", "Please choose a provider.")
                 return
             if is_checked:
                 config["ACCOUNT"] = {
@@ -429,7 +426,7 @@ class MainWindow(QMainWindow):
                     config.write(configfile)
             self.startMainMenu()
         else:
-            message_box(QMessageBox.Icon.Critical, "Error", "Please enter a valid email or password.")
+            message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok, "Error", "Please enter a valid email or password.")
             return
     
     def initMenubar(self):
