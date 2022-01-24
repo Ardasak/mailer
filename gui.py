@@ -21,6 +21,8 @@ password = config.get("ACCOUNT","password")
 provider = config.get("ACCOUNT", "provider")
 provider_port = config.get("ACCOUNT", "provider_port")
 
+context = ssl.create_default_context()
+
 def validate(email):
     try:
         validate_email(email)
@@ -68,7 +70,7 @@ class Window(QWidget):
         send_icon = QtGui.QPixmap("icon/send-message.png")
         self.send_button.setIcon(QtGui.QIcon(send_icon))
         self.send_button.setIconSize(QtCore.QSize(32, 32))
-        self.send_button.clicked.connect(self.send_message)
+        self.send_button.clicked.connect(self.send_mail)
 
         self.clear_button = QPushButton()
         self.clear_button.setStyleSheet(
@@ -166,25 +168,20 @@ class Window(QWidget):
             mail_list.append(self.list_widget.item(index).text())
         return mail_list
 
-    def send_message(self):
+    def send_mail(self):
         try:
             subject = self.subject_area.text()
-            sender_email = email
-            sender_password = password
-            smtp_provider = provider
-            smtp_port = provider_port
             message_text = self.message_area.toPlainText()
-            context = ssl.create_default_context()
-            server = smtplib.SMTP(smtp_provider, smtp_port)
+            server = smtplib.SMTP(provider, provider_port)
             server.ehlo()
             server.starttls(context=context)
             server.ehlo()
-            server.login(sender_email, sender_password)
+            server.login(email, password)
             mail_list = self.get_mail_list()
             for mail in mail_list:
                 message = MIMEMultipart()
                 message["Subject"] = subject
-                message["From"] = sender_email
+                message["From"] = email
                 message["To"] = mail
                 text = message_text
                 mtext = MIMEText(text, "plain")
@@ -197,10 +194,10 @@ class Window(QWidget):
 
                 text = message.as_string()
                 if(self.preference_combobox.currentText()=="Group"):
-                    server.sendmail(sender_email, mail_list, text)
+                    server.sendmail(email, mail_list, text)
                     break
                 else:
-                    server.sendmail(sender_email, mail, text)
+                    server.sendmail(email, mail, text)
             server.quit()
             self.attached = 0
             self.attach_file_button.setIcon(QtGui.QIcon(QtGui.QPixmap("icon/attachment.png")))
@@ -381,6 +378,19 @@ class MainWindow(QMainWindow):
         self.showMaximized()
 
     def login(self, email_input, password_input, provider_input, provider_server, provider_port_input, is_checked):
+        self.all_login_checks(email_input, password_input, provider_input, provider_server, provider_port_input)
+        if is_checked:
+            config["ACCOUNT"] = {
+                "email" : email,
+                "password": password,
+                "provider": provider,
+                "provider_port": provider_port
+            }
+            with open('account.ini', 'w') as configfile:
+                config.write(configfile)
+        
+        
+    def all_login_checks(self, email_input, password_input, provider_input, provider_server, provider_port_input):
         global email
         global password
         global provider
@@ -415,20 +425,18 @@ class MainWindow(QMainWindow):
             else:
                 message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok,"Error", "Please choose a provider.")
                 return
-            if is_checked:
-                config["ACCOUNT"] = {
-                    "email" : email,
-                    "password": password,
-                    "provider": provider,
-                    "provider_port": provider_port
-                }
-                with open('account.ini', 'w') as configfile:
-                    config.write(configfile)
+            try:
+                server = smtplib.SMTP(provider, provider_port)
+                server.ehlo()
+                server.starttls(context=context)
+                server.ehlo()
+                server.login(email, password)
+            except:
+                message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok, "Error", "Can't login.")
+                return
             self.startMainMenu()
         else:
             message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok, "Error", "Please enter a valid email or password.")
-            return
-    
     def initMenubar(self):
         menubar = self.menuBar()
         menubar.setStyleSheet(styles_black_background.menubar_style)
@@ -442,9 +450,6 @@ class MainWindow(QMainWindow):
 
         options_menu.addAction(logoutAct)
     
-
-    
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     w = MainWindow()
