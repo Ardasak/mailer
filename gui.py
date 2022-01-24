@@ -305,6 +305,7 @@ class LoginWindow(QWidget):
         self.password_field = QLineEdit()
         self.password_field.setPlaceholderText("Password: ")
         self.password_field.setStyleSheet(styles_black_background.login_style)
+        self.password_field.setEchoMode(QLineEdit.EchoMode.Password)
 
         self.provider_server = QLineEdit()
         self.provider_server.setPlaceholderText("SMTP Server Address: (e.g. mail.yoursite.com)")
