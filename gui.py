@@ -1,3 +1,4 @@
+from re import S
 from PyQt6.QtWidgets import *
 from PyQt6 import QtCore
 from PyQt6 import QtGui
@@ -26,6 +27,20 @@ def validate(email):
         return 1
     except:
         return 0
+
+def logout():
+    if not (email == "" or password == ""):
+        config["ACCOUNT"] = {
+            "email" : "",
+            "password": "",
+            "provider": "",
+            "provider_port": ""
+        }
+        with open('account.ini', 'w') as configfile:
+            config.write(configfile)
+        exit()
+    else:
+        message_box(QMessageBox.Icon.Critical, "Error", "Already logged out.")
 
 def message_box(icon, title, text):
     msg = QMessageBox()
@@ -195,6 +210,7 @@ class Window(QWidget):
             self.clear_fields()
         except smtplib.SMTPAuthenticationError:
             message_box(QMessageBox.Icon.Critical, "Error", "It looks like we can't send mails with the infos you provide, try logging in again. Make sure the infos are correct.")
+            logout()
         except ssl.SSLCertVerificationError:
             message_box(QMessageBox.Icon.Critical, "Error", "SSL certificate verify failed.")
         except: 
@@ -389,10 +405,15 @@ class MainWindow(QMainWindow):
                 else:
                     message_box(QMessageBox.Icon.Critical, "Error", "SMTP Server Address can not be empty.")
                     return
-                if provider_port_input != "":
-                    provider_port = provider_port_input
-                else:
-                    provider_port = 587
+                try:
+                    provider_port_input = int(provider_port_input)
+                    if provider_port_input != "":
+                        provider_port = provider_port_input
+                    else:
+                        provider_port = 587
+                except ValueError:
+                    message_box(QMessageBox.Icon.Critical, "Error", "SMTP port must be an integer value.")
+                    return
             else:
                 message_box(QMessageBox.Icon.Critical, "Error", "Please choose a provider.")
                 return
@@ -419,23 +440,9 @@ class MainWindow(QMainWindow):
 
         logoutAct = QtGui.QAction(self, text="&Logout")
         logoutAct.setStatusTip('Logout from the account.')
-        logoutAct.triggered.connect(self.logout)
+        logoutAct.triggered.connect(logout)
 
         options_menu.addAction(logoutAct)
-
-    def logout(self):
-        if not (email == "" or password == ""):
-            config["ACCOUNT"] = {
-                "email" : "",
-                "password": "",
-                "provider": "",
-                "provider_port": ""
-            }
-            with open('account.ini', 'w') as configfile:
-                config.write(configfile)
-            exit()
-        else:
-            message_box(QMessageBox.Icon.Critical, "Error", "Already logged out.")
     
 
     
