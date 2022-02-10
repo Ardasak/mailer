@@ -12,6 +12,7 @@ At this point, you have to provide an email, password and provider. Then you'll 
 ![Dashboard](./pictures/picture2.PNG)
 
 **Please do not modify account.ini file manually.**
+**If you want to add mails from a txt file, make sure there is one email per line.**
 
 # Why use that instead of the provider's application?
 

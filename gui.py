@@ -113,6 +113,13 @@ class Window(QWidget):
         self.add_button.setIconSize(QtCore.QSize(32, 32))
         self.add_button.clicked.connect(self.add_item)
 
+        self.add_from_txt_button = QPushButton()
+        self.add_from_txt_button.setStyleSheet(styles_black_background.add_button_style)
+        add_from_txt_icon = QtGui.QPixmap("icon/txt-file.png")
+        self.add_from_txt_button.setIcon(QtGui.QIcon(add_from_txt_icon))
+        self.add_from_txt_button.setIconSize(QtCore.QSize(32, 32))
+        self.add_from_txt_button.clicked.connect(self.add_from_txt_file)
+
         self.delete_button = QPushButton()
         self.delete_button.setStyleSheet(styles_black_background.button_new_page_style)
         delete_icon = QtGui.QPixmap("icon/delete.png")
@@ -144,6 +151,18 @@ class Window(QWidget):
         self.center_placement()
         self.bottom_placement()
         self.setLayout(self.main_v_box)
+
+    def add_from_txt_file(self):
+        self.file = QFileDialog.getOpenFileName(self, "Open File", "", "TXT Files (*.txt*)")
+        line_set = {}
+        line_set = set(line_set)
+        with open(self.file[0], 'r') as f:
+            for line in f:
+                line = line.replace("\n", "")
+                line_set.add(line)
+                
+        for line in line_set:
+            self.list_widget.addItem(line)
 
     def attach_file(self):
         if not (self.attached):
@@ -255,6 +274,7 @@ class Window(QWidget):
         top_layout = QHBoxLayout()
         top_layout.addWidget(self.email_add_field)
         top_layout.addWidget(self.add_button)
+        top_layout.addWidget(self.add_from_txt_button)
         top_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         self.main_v_box.addLayout(top_layout)
 
