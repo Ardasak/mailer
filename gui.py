@@ -31,7 +31,7 @@ def validate(email):
         return 0
 
 def logout():
-    if not (email == "" or password == ""):
+    if email != "" and password != "":
         config["ACCOUNT"] = {
             "email" : "",
             "password": "",
@@ -156,14 +156,15 @@ class Window(QWidget):
         self.file = QFileDialog.getOpenFileName(self, "Open File", "", "TXT Files (*.txt*)")
         line_set = {}
         line_set = set(line_set)
-        with open(self.file[0], 'r') as f:
-            for line in f:
-                line = line.replace("\n", "")
-                line_set.add(line)
-                
-        for line in line_set:
-            self.list_widget.addItem(line)
-
+        if self.file[0] != "":
+            with open(self.file[0], 'r') as f:
+                for line in f:
+                    line = line.replace("\n", "")
+                    line_set.add(line)
+                    
+            for line in line_set:
+                self.list_widget.addItem(line)
+                    
     def attach_file(self):
         if not (self.attached):
             self.file = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*.*)")
@@ -172,7 +173,7 @@ class Window(QWidget):
                 self.attach_file_button.setIcon(QtGui.QIcon(QtGui.QPixmap("icon/attachment-remove.png")))
                 return
             self.attached = 0
-        elif self.attached:
+        else:
             self.file = ""
             self.attached = 0
             self.attach_file_button.setIcon(QtGui.QIcon(QtGui.QPixmap("icon/attachment.png")))
@@ -182,10 +183,10 @@ class Window(QWidget):
         self.email_add_field.setText(self.list_widget.currentItem().text())
     
     def get_mail_list(self):
-        mail_list = []
-        for index in range(self.list_widget.count()):
-            mail_list.append(self.list_widget.item(index).text())
-        return mail_list
+        return [
+            self.list_widget.item(index).text()
+            for index in range(self.list_widget.count())
+        ]
 
     def send_mail(self):
         try:
@@ -254,7 +255,7 @@ class Window(QWidget):
 
     def delete_item(self):
         item = self.list_widget.takeItem(self.list_widget.currentRow())
-        if item == None:
+        if item is None:
             message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok, "Error", "Please select an item to delete.")
             return
         self.list_widget.removeItemWidget(item)
@@ -435,10 +436,7 @@ class MainWindow(QMainWindow):
                     return
                 try:
                     provider_port_input = int(provider_port_input)
-                    if provider_port_input != "":
-                        provider_port = provider_port_input
-                    else:
-                        provider_port = 587
+                    provider_port = provider_port_input if provider_port_input != "" else 587
                 except ValueError:
                     message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok,"Error", "SMTP port must be an integer value.")
                     return
