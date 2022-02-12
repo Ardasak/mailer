@@ -164,7 +164,7 @@ class Window(QWidget):
                     
             for line in line_set:
                 self.list_widget.addItem(line)
-                    
+                                 
     def attach_file(self):
         if not (self.attached):
             self.file = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*.*)")
@@ -198,6 +198,7 @@ class Window(QWidget):
             server.ehlo()
             server.login(email, password)
             mail_list = self.get_mail_list()
+            mail_list_copy = mail_list.copy()
             for mail in mail_list:
                 message = MIMEMultipart()
                 message["Subject"] = subject
@@ -218,6 +219,9 @@ class Window(QWidget):
                     break
                 else:
                     server.sendmail(email, mail, text)
+                    self.list_widget.takeItem(mail_list_copy.index(mail))
+                    mail_list_copy.remove(mail)
+                
             server.quit()
             self.attached = 0
             self.attach_file_button.setIcon(QtGui.QIcon(QtGui.QPixmap("icon/attachment.png")))
@@ -227,11 +231,11 @@ class Window(QWidget):
             logout()
         except ssl.SSLCertVerificationError:
             message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok ,"Error", "SSL certificate verify failed.")
-        except: 
-            message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok, "Error", "An error occured while sending the email.")
+        except:
+            message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok ,"Error", "An unknown error occured while sending email.")
+        
 
     def clear_fields(self):
-        self.list_widget.clear()
         self.email_add_field.clear()
         self.subject_area.clear()
         self.message_area.clear()
@@ -268,6 +272,7 @@ class Window(QWidget):
             
         result = message_box(QMessageBox.Icon.Warning, QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,"Warning", "Are you sure you want to clear all the fields?")
         if result == 16384:
+            self.list_widget.clear()
             self.clear_fields()
     
 
