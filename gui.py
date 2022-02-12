@@ -157,7 +157,7 @@ class Window(QWidget):
         line_set = {}
         line_set = set(line_set)
         if self.file[0] != "":
-            with open(self.file[0], 'r') as f:
+            with open(self.file[0], 'r', encoding="utf-8") as f:
                 for line in f:
                     line = line.replace("\n", "")
                     line_set.add(line)
