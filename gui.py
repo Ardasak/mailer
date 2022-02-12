@@ -227,7 +227,7 @@ class Window(QWidget):
             self.attach_file_button.setIcon(QtGui.QIcon(QtGui.QPixmap("icon/attachment.png")))
             self.clear_fields()
         except smtplib.SMTPAuthenticationError:
-            message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok,"Error", "It looks like we can't send mails with the infos you provide, try logging in again. Make sure the infos are correct.")
+            message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok,"Error", "It looks like we can't send mails, try logging in again. Make sure the credentials are correct.")
             logout()
         except ssl.SSLCertVerificationError:
             message_box(QMessageBox.Icon.Critical, QMessageBox.StandardButton.Ok ,"Error", "SSL certificate verify failed.")
